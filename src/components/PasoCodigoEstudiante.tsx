@@ -1,0 +1,103 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+
+interface EstudianteData {
+  nombre: string;
+  apellidos: string;
+  nivel: string;
+  grado: string;
+  salon: string;
+}
+
+interface Props {
+  label?: string;
+  subtitle?: string;
+  perfil?: "Estudiante" | "Padre de familia";
+  codigosYaUsados?: string[];
+  onValidado: (codigo: string, estudiante: EstudianteData) => void;
+  onBack: () => void;
+}
+
+export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", codigosYaUsados = [], onValidado, onBack }: Props) {
+  const [codigo, setCodigo] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleValidar = async () => {
+    if (!codigo.trim()) {
+      setError("Ingresa el número de documento");
+      return;
+    }
+
+    if (codigosYaUsados.includes(codigo.trim())) {
+      setError("Ya ingresaste este documento para otro estudiante. Cada estudiante debe tener un número diferente.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`/api/validar-codigo?codigo=${encodeURIComponent(codigo.trim())}&perfil=${encodeURIComponent(perfil)}`);
+      const data = await res.json();
+
+      if (!data.existe) {
+        setError("Número de documento no encontrado. Verifica e intenta de nuevo.");
+        return;
+      }
+
+      if (data.ya_registrado) {
+        setError(
+          "Este documento ya está registrado por otro usuario. Si crees que es un error, comunícate con la institución."
+        );
+        return;
+      }
+
+      onValidado(codigo.trim(), data.estudiante);
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <h2 className="text-2xl font-bold text-foreground text-center mb-2">
+        {label || "Número de identificación"}
+      </h2>
+      <p className="text-muted-foreground text-center mb-2">
+        {subtitle || "Ingresa el número de documento con el que te matriculaste"}
+      </p>
+      <p className="text-xs text-muted-foreground text-center mb-8">
+        Si tu documento tiene letras, escribe solo los números
+      </p>
+      <div className="space-y-4 max-w-sm mx-auto">
+        <Input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          placeholder="Ej: 1103127132"
+          value={codigo}
+          onChange={(e) => {
+            setCodigo(e.target.value);
+            setError("");
+          }}
+          onKeyDown={(e) => e.key === "Enter" && handleValidar()}
+          error={error}
+        />
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onBack} className="flex-1">
+            Atrás
+          </Button>
+          <Button onClick={handleValidar} disabled={loading} className="flex-1">
+            {loading ? "Validando..." : "Validar"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
