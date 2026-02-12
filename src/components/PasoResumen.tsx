@@ -54,7 +54,7 @@ export function PasoResumen({
             </div>
             <button
               onClick={() => onEdit(1)}
-              className="text-sm text-primary font-medium hover:underline"
+              className="text-sm text-primary font-medium hover:underline cursor-pointer"
             >
               Cambiar
             </button>
@@ -89,7 +89,7 @@ export function PasoResumen({
               </div>
               <button
                 onClick={() => onEdit(2)}
-                className="text-sm text-primary font-medium hover:underline"
+                className="text-sm text-primary font-medium hover:underline cursor-pointer"
               >
                 Cambiar
               </button>
@@ -108,7 +108,7 @@ export function PasoResumen({
                 </div>
                 <button
                   onClick={() => onEdit(2)}
-                  className="text-sm text-primary font-medium hover:underline"
+                  className="text-sm text-primary font-medium hover:underline cursor-pointer"
                 >
                   Cambiar
                 </button>
@@ -123,7 +123,7 @@ export function PasoResumen({
                 </div>
                 <button
                   onClick={() => onEdit(3)}
-                  className="text-sm text-primary font-medium hover:underline"
+                  className="text-sm text-primary font-medium hover:underline cursor-pointer"
                 >
                   Cambiar
                 </button>
@@ -146,7 +146,7 @@ export function PasoResumen({
                   </div>
                   <button
                     onClick={() => onEdit(4 + i)}
-                    className="text-sm text-primary font-medium hover:underline"
+                    className="text-sm text-primary font-medium hover:underline cursor-pointer"
                   >
                     Cambiar
                   </button>
