@@ -323,6 +323,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
               nivel={pendingPadreEstudiante.nivel}
               grado={pendingPadreEstudiante.grado}
               salon={pendingPadreEstudiante.salon}
+              esPadre
               onConfirm={() => {
                 const updated = [...form.padreEstudiantes];
                 updated[studentIndex] = pendingPadreEstudiante;
