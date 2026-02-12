@@ -42,7 +42,7 @@ export function PasoExito({ perfil, padreNombre, padreNumEstudiantes }: Props) {
       )}
 
       <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
-        Ya puedes volver a WhatsApp y chatear con Normy. ¡Te espero!
+        Ya puedes volver a WhatsApp y chatear conmigo. ¡Te espero!
       </p>
 
       <Image
