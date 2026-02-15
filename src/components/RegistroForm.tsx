@@ -6,6 +6,7 @@ import { PasoSeleccionPerfil } from "./PasoSeleccionPerfil";
 import { PasoCodigoEstudiante } from "./PasoCodigoEstudiante";
 import { PasoConfirmarIdentidad } from "./PasoConfirmarIdentidad";
 import { PasoNombrePadre } from "./PasoNombrePadre";
+import { PasoIdentificacionPadre } from "./PasoIdentificacionPadre";
 import { PasoNumeroEstudiantes } from "./PasoNumeroEstudiantes";
 import { PasoCredenciales } from "./PasoCredenciales";
 import { PasoResumen } from "./PasoResumen";
@@ -53,41 +54,28 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     try {
       const res = await fetch(`/api/obtener-perfil?id=${encodeURIComponent(contactId)}`);
       const data = await res.json();
-
-      if (!data.existe) {
-        setStatus("invalid");
-        return;
-      }
-
-      if (data.ya_registrado) {
-        setStatus("already_registered");
-        return;
-      }
-
+      if (!data.existe) { setStatus("invalid"); return; }
+      if (data.ya_registrado) { setStatus("already_registered"); return; }
       setStatus("form");
     } catch {
       setStatus("invalid");
     }
   }, [contactId]);
 
-  useEffect(() => {
-    checkProfile();
-  }, [checkProfile]);
+  useEffect(() => { checkProfile(); }, [checkProfile]);
 
-  // Helper: number of parent students
   const getParentN = () => form.padreNumEstudiantes ? NUM_MAP[form.padreNumEstudiantes] : 0;
 
-  // Parent flow: 1-Profile, 2-Name, 3-NumStudents, 4..students.., credStep, summaryStep
-  const getParentCredentialStep = () => 4 + getParentN() * 2;
-  const getParentSummaryStep = () => 4 + getParentN() * 2 + 1;
+  // Parent flow: 1-Profile, 2-Name, 3-ID, 4-NumStudents, 5..students, passwordStep, summaryStep
+  const getParentPasswordStep = () => 5 + getParentN() * 2;
+  const getParentSummaryStep = () => 6 + getParentN() * 2;
 
-  // Student flow: 1-Profile, 2-Code, 3-Confirm, 4-Password, 5-Summary = 5 steps
-  // Parent flow: 1-Profile, 2-Name, 3-NumStudents, students, credentials, summary = 5 + N*2
+  // Student: 5 steps. Parent: 6 + N*2
   const getTotalSteps = () => {
     if (!form.perfil) return 1;
     if (form.perfil === "Estudiante") return 5;
     const n = getParentN() || 1;
-    return 5 + n * 2;
+    return 6 + n * 2;
   };
 
   const getCodigosYaUsados = (excludeIndex?: number) => {
@@ -99,14 +87,12 @@ export function RegistroForm({ contactId }: { contactId: string }) {
   const handleSubmit = async () => {
     setSubmitLoading(true);
     setSubmitError("");
-
     try {
       const body: Record<string, string | undefined> = {
         id: contactId,
         perfil: form.perfil,
         contrasena: form.contrasena,
       };
-
       if (form.perfil === "Estudiante" && form.estudiante) {
         body.estudiante_codigo = form.estudiante.codigo;
       } else if (form.perfil === "Padre de familia") {
@@ -117,20 +103,16 @@ export function RegistroForm({ contactId }: { contactId: string }) {
           body[`padre_estudiante${i + 1}_codigo`] = est.codigo;
         });
       }
-
       const res = await fetch("/api/guardar-perfil", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setSubmitError(data.error || "Error al guardar. Intenta de nuevo.");
         return;
       }
-
       setStatus("success");
     } catch {
       setSubmitError("Error de conexión. Intenta de nuevo.");
@@ -139,13 +121,11 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     }
   };
 
-  // When editing from summary, go directly to the target step
   const handleEdit = (targetStep: number) => {
     setEditingFromSummary(true);
     setStep(targetStep);
   };
 
-  // Helper: go back to summary after an edit
   const returnToSummary = () => {
     setEditingFromSummary(false);
     if (form.perfil === "Estudiante") {
@@ -156,7 +136,6 @@ export function RegistroForm({ contactId }: { contactId: string }) {
   };
 
   // === STATUS SCREENS ===
-
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-[300px]">
@@ -183,11 +162,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
 
   if (status === "already_registered") return <PasoYaRegistrado />;
   if (status === "success") return (
-    <PasoExito
-      perfil={form.perfil}
-      padreNombre={form.padreNombre}
-      padreNumEstudiantes={form.padreNumEstudiantes}
-    />
+    <PasoExito perfil={form.perfil} padreNombre={form.padreNombre} padreNumEstudiantes={form.padreNumEstudiantes} />
   );
 
   // === STEP 1: Profile selection ===
@@ -205,13 +180,14 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     );
   }
 
-  // === STUDENT FLOW ===
-  // Steps: 1-Profile, 2-Code, 3-Confirm, 4-Password, 5-Summary
+  // =============================================
+  // STUDENT FLOW: 1-Profile, 2-Code, 3-Confirm, 4-Password, 5-Summary
+  // =============================================
   if (form.perfil === "Estudiante") {
     if (step === 2) {
       return (
         <>
-          <ProgressBar currentStep={2} totalSteps={getTotalSteps()} />
+          <ProgressBar currentStep={2} totalSteps={5} />
           <PasoCodigoEstudiante
             perfil="Estudiante"
             onValidado={(codigo, est) => {
@@ -219,9 +195,8 @@ export function RegistroForm({ contactId }: { contactId: string }) {
               setStep(3);
             }}
             onBack={() => {
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
+              if (editingFromSummary) { returnToSummary(); }
+              else {
                 setForm({ ...form, perfil: undefined, estudiante: undefined });
                 setPendingEstudiante(null);
                 setStep(1);
@@ -235,7 +210,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     if (step === 3 && pendingEstudiante) {
       return (
         <>
-          <ProgressBar currentStep={3} totalSteps={getTotalSteps()} />
+          <ProgressBar currentStep={3} totalSteps={5} />
           <PasoConfirmarIdentidad
             nombre={pendingEstudiante.nombre}
             apellidos={pendingEstudiante.apellidos}
@@ -245,16 +220,10 @@ export function RegistroForm({ contactId }: { contactId: string }) {
             onConfirm={() => {
               setForm({ ...form, estudiante: pendingEstudiante });
               setPendingEstudiante(null);
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
-                setStep(4);
-              }
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(4); }
             }}
-            onDeny={() => {
-              setPendingEstudiante(null);
-              setStep(2);
-            }}
+            onDeny={() => { setPendingEstudiante(null); setStep(2); }}
           />
         </>
       );
@@ -263,20 +232,16 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     if (step === 4) {
       return (
         <>
-          <ProgressBar currentStep={4} totalSteps={getTotalSteps()} />
+          <ProgressBar currentStep={4} totalSteps={5} />
           <PasoCredenciales
-            perfil="Estudiante"
-            onContinue={({ contrasena }) => {
+            onContinue={(contrasena) => {
               setForm({ ...form, contrasena });
               setEditingFromSummary(false);
               setStep(5);
             }}
             onBack={() => {
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
-                setStep(2);
-              }
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(2); }
             }}
           />
         </>
@@ -286,7 +251,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     if (step === 5 && form.estudiante) {
       return (
         <>
-          <ProgressBar currentStep={5} totalSteps={getTotalSteps()} />
+          <ProgressBar currentStep={5} totalSteps={5} />
           <PasoResumen
             perfil="Estudiante"
             estudiante={form.estudiante}
@@ -302,9 +267,15 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     }
   }
 
-  // === PARENT FLOW ===
-  // Steps: 1-Profile, 2-Name, 3-NumStudents, 4..students.., credStep, summaryStep
+  // =============================================
+  // PARENT FLOW: 1-Profile, 2-Name, 3-ID, 4-NumStudents, 5..students, passwordStep, summaryStep
+  // =============================================
   if (form.perfil === "Padre de familia") {
+    const totalStudents = getParentN();
+    const passwordStep = getParentPasswordStep();
+    const summaryStep = getParentSummaryStep();
+
+    // Step 2: Name
     if (step === 2) {
       return (
         <>
@@ -313,61 +284,67 @@ export function RegistroForm({ contactId }: { contactId: string }) {
             initialValue={form.padreNombre}
             onContinue={(nombre) => {
               setForm({ ...form, padreNombre: nombre });
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
-                setStep(3);
-              }
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(3); }
             }}
             onBack={() => {
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
-                setForm({ ...form, perfil: undefined });
-                setStep(1);
-              }
+              if (editingFromSummary) { returnToSummary(); }
+              else { setForm({ ...form, perfil: undefined }); setStep(1); }
             }}
           />
         </>
       );
     }
 
+    // Step 3: Identification
     if (step === 3) {
       return (
         <>
           <ProgressBar currentStep={3} totalSteps={getTotalSteps()} />
-          <PasoNumeroEstudiantes
-            onSelect={(num) => {
-              if (editingFromSummary && num === form.padreNumEstudiantes) {
-                // Same number, go back to summary
-                returnToSummary();
-              } else {
-                // Different number or first time: reset students
-                setForm({ ...form, padreNumEstudiantes: num, padreEstudiantes: [] });
-                setEditingFromSummary(false);
-                setStep(4);
-              }
+          <PasoIdentificacionPadre
+            initialValue={form.padreCodigo}
+            onContinue={(codigo) => {
+              setForm({ ...form, padreCodigo: codigo });
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(4); }
             }}
             onBack={() => {
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
-                setStep(2);
-              }
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(2); }
             }}
           />
         </>
       );
     }
 
-    const totalStudents = getParentN();
-    const credentialStep = getParentCredentialStep();
-    const summaryStep = getParentSummaryStep();
+    // Step 4: Number of students
+    if (step === 4) {
+      return (
+        <>
+          <ProgressBar currentStep={4} totalSteps={getTotalSteps()} />
+          <PasoNumeroEstudiantes
+            onSelect={(num) => {
+              if (editingFromSummary && num === form.padreNumEstudiantes) {
+                returnToSummary();
+              } else {
+                setForm({ ...form, padreNumEstudiantes: num, padreEstudiantes: [] });
+                setEditingFromSummary(false);
+                setStep(5);
+              }
+            }}
+            onBack={() => {
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(3); }
+            }}
+          />
+        </>
+      );
+    }
 
-    // Student steps: 4 to 4+N*2-1
-    if (step >= 4 && step < 4 + totalStudents * 2) {
-      const studentIndex = Math.floor((step - 4) / 2);
-      const isCodeStep = (step - 4) % 2 === 0;
+    // Steps 5 to 5+N*2-1: Students
+    if (step >= 5 && step < 5 + totalStudents * 2) {
+      const studentIndex = Math.floor((step - 5) / 2);
+      const isCodeStep = (step - 5) % 2 === 0;
 
       if (isCodeStep) {
         const ordinal = totalStudents > 1 ? ` ${studentIndex + 1}` : "";
@@ -387,7 +364,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
                 if (editingFromSummary) {
                   returnToSummary();
                 } else if (studentIndex === 0) {
-                  setStep(3);
+                  setStep(4);
                 } else {
                   const updated = [...form.padreEstudiantes];
                   updated.pop();
@@ -418,12 +395,11 @@ export function RegistroForm({ contactId }: { contactId: string }) {
                 setPendingPadreEstudiante(null);
 
                 if (editingFromSummary) {
-                  // Go back to summary, keeping other students intact
                   returnToSummary();
                 } else if (studentIndex + 1 < totalStudents) {
                   setStep(step + 1);
                 } else {
-                  setStep(credentialStep);
+                  setStep(passwordStep);
                 }
               }}
               onDeny={() => {
@@ -436,33 +412,27 @@ export function RegistroForm({ contactId }: { contactId: string }) {
       }
     }
 
-    // Credentials step (after all students)
-    if (step === credentialStep) {
+    // Password step (after all students)
+    if (step === passwordStep) {
       return (
         <>
-          <ProgressBar currentStep={credentialStep} totalSteps={getTotalSteps()} />
+          <ProgressBar currentStep={passwordStep} totalSteps={getTotalSteps()} />
           <PasoCredenciales
-            perfil="Padre de familia"
-            initialPadreCodigo={form.padreCodigo}
-            onContinue={({ padreCodigo, contrasena }) => {
-              setForm({ ...form, padreCodigo, contrasena });
+            onContinue={(contrasena) => {
+              setForm({ ...form, contrasena });
               setEditingFromSummary(false);
               setStep(summaryStep);
             }}
             onBack={() => {
-              if (editingFromSummary) {
-                returnToSummary();
-              } else {
-                // Go back to last student's confirm step
-                setStep(credentialStep - 1);
-              }
+              if (editingFromSummary) { returnToSummary(); }
+              else { setStep(passwordStep - 1); }
             }}
           />
         </>
       );
     }
 
-    // Summary step
+    // Summary
     if (step === summaryStep && form.padreEstudiantes.length === totalStudents) {
       return (
         <>
@@ -474,7 +444,8 @@ export function RegistroForm({ contactId }: { contactId: string }) {
             contrasena={form.contrasena}
             padreNumEstudiantes={form.padreNumEstudiantes}
             padreEstudiantes={form.padreEstudiantes}
-            credentialStep={credentialStep}
+            credentialStep={passwordStep}
+            identificationStep={3}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
             loading={submitLoading}
@@ -485,7 +456,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     }
   }
 
-  // Fallback: go to step 1
+  // Fallback
   return (
     <PasoSeleccionPerfil
       onSelect={(perfil) => {

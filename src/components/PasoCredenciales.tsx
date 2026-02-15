@@ -6,15 +6,11 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 interface Props {
-  perfil: "Estudiante" | "Padre de familia";
-  initialPadreCodigo?: string;
-  onContinue: (data: { padreCodigo?: string; contrasena: string }) => void;
+  onContinue: (contrasena: string) => void;
   onBack: () => void;
 }
 
-export function PasoCredenciales({ perfil, initialPadreCodigo = "", onContinue, onBack }: Props) {
-  const esPadre = perfil === "Padre de familia";
-  const [padreCodigo, setPadreCodigo] = useState(initialPadreCodigo);
+export function PasoCredenciales({ onContinue, onBack }: Props) {
   const [contrasena, setContrasena] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,10 +18,6 @@ export function PasoCredenciales({ perfil, initialPadreCodigo = "", onContinue, 
   const [error, setError] = useState("");
 
   const handleContinue = () => {
-    if (esPadre && !padreCodigo.trim()) {
-      setError("Ingresa tu número de identificación");
-      return;
-    }
     if (!contrasena) {
       setError("Ingresa una contraseña");
       return;
@@ -38,44 +30,18 @@ export function PasoCredenciales({ perfil, initialPadreCodigo = "", onContinue, 
       setError("Las contraseñas no coinciden");
       return;
     }
-
-    onContinue({
-      padreCodigo: esPadre ? padreCodigo.trim() : undefined,
-      contrasena,
-    });
+    onContinue(contrasena);
   };
 
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-foreground text-center mb-2">
-        {esPadre ? "Identificación y contraseña" : "Crea tu contraseña"}
+        Crea tu contraseña
       </h2>
-      <p className="text-muted-foreground text-center mb-2">
-        {esPadre
-          ? "Ingresa tu número de identificación y crea una contraseña para la plataforma"
-          : "Esta contraseña te servirá para ingresar a la plataforma"}
+      <p className="text-muted-foreground text-center mb-8">
+        Esta contraseña te servirá para ingresar a la plataforma
       </p>
-      {esPadre && (
-        <p className="text-xs text-muted-foreground text-center mb-8">
-          Si tu documento tiene letras, escribe solo los números
-        </p>
-      )}
-      {!esPadre && <div className="mb-8" />}
       <div className="space-y-4 max-w-sm mx-auto">
-        {esPadre && (
-          <Input
-            type="text"
-            inputMode="numeric"
-            label="Número de identificación"
-            placeholder="Ej: 1103127132"
-            value={padreCodigo}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "");
-              setPadreCodigo(val);
-              setError("");
-            }}
-          />
-        )}
         <div className="relative">
           <Input
             type={showPassword ? "text" : "password"}

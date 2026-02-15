@@ -21,6 +21,7 @@ interface Props {
   padreNumEstudiantes?: string;
   padreEstudiantes?: EstudianteInfo[];
   credentialStep: number;
+  identificationStep?: number;
   onEdit: (step: number) => void;
   onSubmit: () => void;
   loading: boolean;
@@ -36,6 +37,7 @@ export function PasoResumen({
   padreNumEstudiantes,
   padreEstudiantes,
   credentialStep,
+  identificationStep,
   onEdit,
   onSubmit,
   loading,
@@ -121,6 +123,23 @@ export function PasoResumen({
               </div>
             </Card>
 
+            {padreCodigo && (
+              <Card className="p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Identificación</span>
+                    <p className="font-semibold text-foreground">{padreCodigo}</p>
+                  </div>
+                  <button
+                    onClick={() => onEdit(identificationStep || 3)}
+                    className="text-sm text-primary font-medium hover:underline cursor-pointer"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              </Card>
+            )}
+
             <Card className="p-4">
               <div className="flex justify-between items-center">
                 <div>
@@ -128,7 +147,7 @@ export function PasoResumen({
                   <p className="font-semibold text-foreground">{padreNumEstudiantes}</p>
                 </div>
                 <button
-                  onClick={() => onEdit(3)}
+                  onClick={() => onEdit(4)}
                   className="text-sm text-primary font-medium hover:underline cursor-pointer"
                 >
                   Cambiar
@@ -151,7 +170,7 @@ export function PasoResumen({
                     </p>
                   </div>
                   <button
-                    onClick={() => onEdit(4 + i * 2)}
+                    onClick={() => onEdit(5 + i * 2)}
                     className="text-sm text-primary font-medium hover:underline cursor-pointer"
                   >
                     Cambiar
@@ -159,23 +178,6 @@ export function PasoResumen({
                 </div>
               </Card>
             ))}
-
-            {padreCodigo && (
-              <Card className="p-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-sm text-muted-foreground">Identificación</span>
-                    <p className="font-semibold text-foreground">{padreCodigo}</p>
-                  </div>
-                  <button
-                    onClick={() => onEdit(credentialStep)}
-                    className="text-sm text-primary font-medium hover:underline cursor-pointer"
-                  >
-                    Cambiar
-                  </button>
-                </div>
-              </Card>
-            )}
           </>
         )}
 
