@@ -25,6 +25,11 @@ export async function POST(request: NextRequest) {
   // Build the update object
   const updateData: Record<string, string | null> = { perfil };
 
+  // Save password for both profiles
+  if (campos.contrasena) {
+    updateData.contrasena = campos.contrasena;
+  }
+
   if (perfil === "Estudiante") {
     if (!campos.estudiante_codigo) {
       return NextResponse.json({ error: "Falta el código estudiantil" }, { status: 400 });
@@ -36,6 +41,9 @@ export async function POST(request: NextRequest) {
     }
     updateData.padre_nombre = campos.padre_nombre;
     updateData.padre_numero_de_estudiantes = campos.padre_numero_de_estudiantes;
+    if (campos.padre_codigo) {
+      updateData.padre_codigo = campos.padre_codigo;
+    }
 
     // Add student codes based on number of students
     const numMap: Record<string, number> = {

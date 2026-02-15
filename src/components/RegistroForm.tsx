@@ -7,6 +7,7 @@ import { PasoCodigoEstudiante } from "./PasoCodigoEstudiante";
 import { PasoConfirmarIdentidad } from "./PasoConfirmarIdentidad";
 import { PasoNombrePadre } from "./PasoNombrePadre";
 import { PasoNumeroEstudiantes } from "./PasoNumeroEstudiantes";
+import { PasoCredenciales } from "./PasoCredenciales";
 import { PasoResumen } from "./PasoResumen";
 import { PasoExito } from "./PasoExito";
 import { PasoYaRegistrado } from "./PasoYaRegistrado";
@@ -26,6 +27,8 @@ type NumEstudiantes = "1 (uno)" | "2 (dos)" | "3 (tres)";
 interface FormState {
   perfil?: Perfil;
   estudiante?: EstudianteInfo;
+  contrasena?: string;
+  padreCodigo?: string;
   padreNombre?: string;
   padreNumEstudiantes?: NumEstudiantes;
   padreEstudiantes: EstudianteInfo[];
@@ -68,12 +71,14 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     checkProfile();
   }, [checkProfile]);
 
+  // Student flow: 1-Profile, 2-Code, 3-Confirm, 4-Password, 5-Summary = 5 steps
+  // Parent flow: 1-Profile, 2-Name, 3-ID+Password, 4-NumStudents, 5...-Students, Final-Summary
   const getTotalSteps = () => {
     if (!form.perfil) return 1;
-    if (form.perfil === "Estudiante") return 4;
+    if (form.perfil === "Estudiante") return 5;
     const numMap: Record<string, number> = { "1 (uno)": 1, "2 (dos)": 2, "3 (tres)": 3 };
     const n = form.padreNumEstudiantes ? numMap[form.padreNumEstudiantes] : 1;
-    return 3 + n * 2 + 1;
+    return 4 + n * 2 + 1; // 4 fixed steps + 2 per student + summary
   };
 
   // Get codes already confirmed by the parent (to prevent duplicates)
@@ -91,11 +96,13 @@ export function RegistroForm({ contactId }: { contactId: string }) {
       const body: Record<string, string | undefined> = {
         id: contactId,
         perfil: form.perfil,
+        contrasena: form.contrasena,
       };
 
       if (form.perfil === "Estudiante" && form.estudiante) {
         body.estudiante_codigo = form.estudiante.codigo;
       } else if (form.perfil === "Padre de familia") {
+        body.padre_codigo = form.padreCodigo;
         body.padre_nombre = form.padreNombre;
         body.padre_numero_de_estudiantes = form.padreNumEstudiantes;
         form.padreEstudiantes.forEach((est, i) => {
@@ -168,7 +175,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     return (
       <PasoSeleccionPerfil
         onSelect={(perfil) => {
-          setForm({ ...form, perfil, estudiante: undefined, padreEstudiantes: [] });
+          setForm({ ...form, perfil, estudiante: undefined, padreEstudiantes: [], contrasena: undefined, padreCodigo: undefined });
           setPendingEstudiante(null);
           setPendingPadreEstudiante(null);
           setStep(2);
@@ -178,6 +185,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
   }
 
   // === STUDENT FLOW ===
+  // Steps: 1-Profile, 2-Code, 3-Confirm, 4-Password, 5-Summary
   if (form.perfil === "Estudiante") {
     if (step === 2) {
       return (
@@ -223,13 +231,30 @@ export function RegistroForm({ contactId }: { contactId: string }) {
       );
     }
 
-    if (step === 4 && form.estudiante) {
+    if (step === 4) {
       return (
         <>
           <ProgressBar currentStep={4} totalSteps={getTotalSteps()} />
+          <PasoCredenciales
+            perfil="Estudiante"
+            onContinue={({ contrasena }) => {
+              setForm({ ...form, contrasena });
+              setStep(5);
+            }}
+            onBack={() => setStep(2)}
+          />
+        </>
+      );
+    }
+
+    if (step === 5 && form.estudiante) {
+      return (
+        <>
+          <ProgressBar currentStep={5} totalSteps={getTotalSteps()} />
           <PasoResumen
             perfil="Estudiante"
             estudiante={form.estudiante}
+            contrasena={form.contrasena}
             onEdit={handleEdit}
             onSubmit={handleSubmit}
             loading={submitLoading}
@@ -241,6 +266,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
   }
 
   // === PARENT FLOW ===
+  // Steps: 1-Profile, 2-Name, 3-ID+Password, 4-NumStudents, 5...-Students, Final-Summary
   if (form.perfil === "Padre de familia") {
     if (step === 2) {
       return (
@@ -265,9 +291,11 @@ export function RegistroForm({ contactId }: { contactId: string }) {
       return (
         <>
           <ProgressBar currentStep={3} totalSteps={getTotalSteps()} />
-          <PasoNumeroEstudiantes
-            onSelect={(num) => {
-              setForm({ ...form, padreNumEstudiantes: num, padreEstudiantes: [] });
+          <PasoCredenciales
+            perfil="Padre de familia"
+            initialPadreCodigo={form.padreCodigo}
+            onContinue={({ padreCodigo, contrasena }) => {
+              setForm({ ...form, padreCodigo, contrasena });
               setStep(4);
             }}
             onBack={() => setStep(2)}
@@ -276,13 +304,28 @@ export function RegistroForm({ contactId }: { contactId: string }) {
       );
     }
 
+    if (step === 4) {
+      return (
+        <>
+          <ProgressBar currentStep={4} totalSteps={getTotalSteps()} />
+          <PasoNumeroEstudiantes
+            onSelect={(num) => {
+              setForm({ ...form, padreNumEstudiantes: num, padreEstudiantes: [] });
+              setStep(5);
+            }}
+            onBack={() => setStep(3)}
+          />
+        </>
+      );
+    }
+
     const numMap: Record<string, number> = { "1 (uno)": 1, "2 (dos)": 2, "3 (tres)": 3 };
     const totalStudents = form.padreNumEstudiantes ? numMap[form.padreNumEstudiantes] : 0;
 
-    // Each student has 2 substeps: code (even offset) + confirm (odd offset)
-    if (step >= 4 && step < 4 + totalStudents * 2) {
-      const studentIndex = Math.floor((step - 4) / 2);
-      const isCodeStep = (step - 4) % 2 === 0;
+    // Student steps start at 5. Each student has 2 substeps: code (even offset) + confirm (odd offset)
+    if (step >= 5 && step < 5 + totalStudents * 2) {
+      const studentIndex = Math.floor((step - 5) / 2);
+      const isCodeStep = (step - 5) % 2 === 0;
 
       if (isCodeStep) {
         const ordinal = totalStudents > 1 ? ` ${studentIndex + 1}` : "";
@@ -300,7 +343,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
               }}
               onBack={() => {
                 if (studentIndex === 0) {
-                  setStep(3);
+                  setStep(4);
                 } else {
                   const updated = [...form.padreEstudiantes];
                   updated.pop();
@@ -333,7 +376,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
                 if (studentIndex + 1 < totalStudents) {
                   setStep(step + 1);
                 } else {
-                  setStep(4 + totalStudents * 2);
+                  setStep(5 + totalStudents * 2);
                 }
               }}
               onDeny={() => {
@@ -346,7 +389,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
       }
     }
 
-    const summaryStep = 4 + totalStudents * 2;
+    const summaryStep = 5 + totalStudents * 2;
     if (step === summaryStep && form.padreEstudiantes.length === totalStudents) {
       return (
         <>
@@ -354,14 +397,16 @@ export function RegistroForm({ contactId }: { contactId: string }) {
           <PasoResumen
             perfil="Padre de familia"
             padreNombre={form.padreNombre}
+            padreCodigo={form.padreCodigo}
+            contrasena={form.contrasena}
             padreNumEstudiantes={form.padreNumEstudiantes}
             padreEstudiantes={form.padreEstudiantes}
             onEdit={(targetStep) => {
-              if (targetStep <= 3) {
+              if (targetStep <= 4) {
                 handleEdit(targetStep);
               } else {
-                const studIdx = targetStep - 4;
-                const codeStep = 4 + studIdx * 2;
+                const studIdx = targetStep - 5;
+                const codeStep = 5 + studIdx * 2;
                 handleEdit(codeStep);
               }
             }}

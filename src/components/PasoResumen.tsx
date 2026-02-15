@@ -15,6 +15,8 @@ interface EstudianteInfo {
 interface Props {
   perfil: "Estudiante" | "Padre de familia";
   estudiante?: EstudianteInfo;
+  contrasena?: string;
+  padreCodigo?: string;
   padreNombre?: string;
   padreNumEstudiantes?: string;
   padreEstudiantes?: EstudianteInfo[];
@@ -27,6 +29,8 @@ interface Props {
 export function PasoResumen({
   perfil,
   estudiante,
+  contrasena,
+  padreCodigo,
   padreNombre,
   padreNumEstudiantes,
   padreEstudiantes,
@@ -35,6 +39,9 @@ export function PasoResumen({
   loading,
   error,
 }: Props) {
+  // Student: step 4 = password. Parent: step 3 = ID+password
+  const credentialStep = perfil === "Estudiante" ? 4 : 3;
+
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-foreground text-center mb-2">
@@ -115,6 +122,23 @@ export function PasoResumen({
               </div>
             </Card>
 
+            {padreCodigo && (
+              <Card className="p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Identificación</span>
+                    <p className="font-semibold text-foreground">{padreCodigo}</p>
+                  </div>
+                  <button
+                    onClick={() => onEdit(credentialStep)}
+                    className="text-sm text-primary font-medium hover:underline cursor-pointer"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              </Card>
+            )}
+
             <Card className="p-4">
               <div className="flex justify-between items-center">
                 <div>
@@ -122,7 +146,7 @@ export function PasoResumen({
                   <p className="font-semibold text-foreground">{padreNumEstudiantes}</p>
                 </div>
                 <button
-                  onClick={() => onEdit(3)}
+                  onClick={() => onEdit(4)}
                   className="text-sm text-primary font-medium hover:underline cursor-pointer"
                 >
                   Cambiar
@@ -145,7 +169,7 @@ export function PasoResumen({
                     </p>
                   </div>
                   <button
-                    onClick={() => onEdit(4 + i)}
+                    onClick={() => onEdit(5 + i)}
                     className="text-sm text-primary font-medium hover:underline cursor-pointer"
                   >
                     Cambiar
@@ -155,6 +179,22 @@ export function PasoResumen({
             ))}
           </>
         )}
+
+        {/* Credentials */}
+        <Card className="p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <span className="text-sm text-muted-foreground">Contraseña</span>
+              <p className="font-semibold text-foreground">{"•".repeat(contrasena?.length || 4)}</p>
+            </div>
+            <button
+              onClick={() => onEdit(credentialStep)}
+              className="text-sm text-primary font-medium hover:underline cursor-pointer"
+            >
+              Cambiar
+            </button>
+          </div>
+        </Card>
 
         {error && (
           <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm text-center">
