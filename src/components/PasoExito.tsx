@@ -41,8 +41,16 @@ export function PasoExito({ perfil, padreNombre, padreNumEstudiantes }: Props) {
         </p>
       )}
 
-      <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+      <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
         Ya puedes volver a WhatsApp y chatear conmigo. ¡Te espero!
+      </p>
+
+      <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-sm">
+        También puedes acceder a la plataforma en{" "}
+        <a href="https://notasnormy.com" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold hover:underline">
+          notasnormy.com
+        </a>{" "}
+        con tu identificación y contraseña.
       </p>
 
       <Image
