@@ -45,8 +45,8 @@ export function PasoCredenciales({ perfil, initialPadreCodigo = "", onContinue, 
       setError("Ingresa una contraseña");
       return;
     }
-    if (contrasena.length < 4) {
-      setError("La contraseña debe tener al menos 4 caracteres");
+    if (contrasena.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
     if (contrasena !== confirmar) {
@@ -95,7 +95,7 @@ export function PasoCredenciales({ perfil, initialPadreCodigo = "", onContinue, 
           <Input
             type={showPassword ? "text" : "password"}
             label="Contraseña"
-            placeholder="Mínimo 4 caracteres"
+            placeholder="Mínimo 6 caracteres"
             value={contrasena}
             onChange={(e) => {
               setContrasena(e.target.value);
