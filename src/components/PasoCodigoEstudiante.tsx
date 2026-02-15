@@ -73,7 +73,9 @@ export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", c
         {subtitle || "Ingresa el número de documento con el que te matriculaste"}
       </p>
       <p className="text-xs text-muted-foreground text-center mb-8">
-        Si tu documento tiene letras, escribe solo los números
+        {perfil === "Padre de familia"
+          ? "Si su documento tiene letras, escribe solo los números"
+          : "Si tu documento tiene letras, escribe solo los números"}
       </p>
       <div className="space-y-4 max-w-sm mx-auto">
         <Input
