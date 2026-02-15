@@ -334,7 +334,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
             <ProgressBar currentStep={step} totalSteps={getTotalSteps()} />
             <PasoCodigoEstudiante
               label={`Documento del estudiante${ordinal}`}
-              subtitle="Ingresa el número de documento de tu niño/a"
+              subtitle="Ingresa el número de documento con el que se matriculó tu niño/a"
               perfil="Padre de familia"
               codigosYaUsados={getCodigosYaUsados(studentIndex)}
               onValidado={(codigo, est) => {
