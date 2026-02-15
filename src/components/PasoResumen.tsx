@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 
@@ -43,6 +45,8 @@ export function PasoResumen({
   loading,
   error,
 }: Props) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-foreground text-center mb-2">
@@ -186,7 +190,19 @@ export function PasoResumen({
           <div className="flex justify-between items-center">
             <div>
               <span className="text-sm text-muted-foreground">Contraseña</span>
-              <p className="font-semibold text-foreground">{"•".repeat(contrasena?.length || 6)}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-foreground">
+                  {showPassword ? contrasena : "•".repeat(contrasena?.length || 6)}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="p-1 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+                </button>
+              </div>
             </div>
             <button
               onClick={() => onEdit(credentialStep)}
