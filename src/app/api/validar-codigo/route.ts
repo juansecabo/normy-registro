@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   let ya_registrado = false;
 
   if (perfil === "Estudiante") {
-    // Only one student can register with a given code
+    // Check the code isn't already taken by another student
     const { data: existing } = await supabase
       .from("Perfiles_Generales")
       .select("id")
@@ -33,10 +33,21 @@ export async function GET(request: NextRequest) {
     if (existing && existing.length > 0) {
       ya_registrado = true;
     }
+
+    // Check the code isn't already used as a parent identification
+    if (!ya_registrado) {
+      const { data: existingPadre } = await supabase
+        .from("Perfiles_Generales")
+        .select("id")
+        .eq("padre_codigo", codigo)
+        .not("padre_codigo", "is", null)
+        .limit(1);
+
+      if (existingPadre && existingPadre.length > 0) {
+        ya_registrado = true;
+      }
+    }
   }
-  // For parents: no duplicate check needed.
-  // Multiple parents can register the same student.
-  // Same-parent duplicate is handled client-side.
 
   return NextResponse.json({
     existe: true,

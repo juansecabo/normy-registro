@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // For parents: check padre_codigo isn't already taken by another parent
+  // Cross-validation: ensure identification isn't used in the other profile type
   if (perfil === "Padre de familia" && updateData.padre_codigo) {
     const { data: dupPadre } = await supabase
       .from("Perfiles_Generales")
@@ -98,12 +98,23 @@ export async function POST(request: NextRequest) {
 
     if (dupPadre && dupPadre.length > 0) {
       return NextResponse.json({
-        error: "Esta identificación ya está registrada por otro padre de familia",
+        error: "Esta identificación ya está registrada",
+      }, { status: 409 });
+    }
+
+    const { data: dupAsEstudiante } = await supabase
+      .from("Perfiles_Generales")
+      .select("id")
+      .eq("estudiante_codigo", updateData.padre_codigo)
+      .limit(1);
+
+    if (dupAsEstudiante && dupAsEstudiante.length > 0) {
+      return NextResponse.json({
+        error: "Esta identificación ya está registrada como estudiante",
       }, { status: 409 });
     }
   }
 
-  // For students only: check the code isn't already taken by another student
   if (perfil === "Estudiante" && updateData.estudiante_codigo) {
     const { data: dup } = await supabase
       .from("Perfiles_Generales")
@@ -116,8 +127,20 @@ export async function POST(request: NextRequest) {
         error: "Este documento ya está registrado por otro estudiante",
       }, { status: 409 });
     }
+
+    const { data: dupAsPadre } = await supabase
+      .from("Perfiles_Generales")
+      .select("id")
+      .eq("padre_codigo", updateData.estudiante_codigo)
+      .not("padre_codigo", "is", null)
+      .limit(1);
+
+    if (dupAsPadre && dupAsPadre.length > 0) {
+      return NextResponse.json({
+        error: "Este documento ya está registrado como padre de familia",
+      }, { status: 409 });
+    }
   }
-  // For parents: no global uniqueness check. Multiple parents can have the same student.
 
   // Perform the update
   const { error } = await supabase
