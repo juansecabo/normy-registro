@@ -87,6 +87,22 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // For parents: check padre_codigo isn't already taken by another parent
+  if (perfil === "Padre de familia" && updateData.padre_codigo) {
+    const { data: dupPadre } = await supabase
+      .from("Perfiles_Generales")
+      .select("id")
+      .eq("padre_codigo", updateData.padre_codigo)
+      .not("padre_codigo", "is", null)
+      .limit(1);
+
+    if (dupPadre && dupPadre.length > 0) {
+      return NextResponse.json({
+        error: "Esta identificación ya está registrada por otro padre de familia",
+      }, { status: 409 });
+    }
+  }
+
   // For students only: check the code isn't already taken by another student
   if (perfil === "Estudiante" && updateData.estudiante_codigo) {
     const { data: dup } = await supabase
