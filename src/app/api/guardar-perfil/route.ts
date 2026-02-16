@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     if (dupPadre && dupPadre.length > 0) {
       return NextResponse.json({
-        error: "Esta identificación ya está registrada",
+        error: "Ya alguien se registró con esta identificación. Comunícate con la institución.",
       }, { status: 409 });
     }
 
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     if (dupAsEstudiante && dupAsEstudiante.length > 0) {
       return NextResponse.json({
-        error: "Esta identificación ya está registrada como estudiante",
+        error: "Ya alguien se registró con esta identificación como estudiante. Comunícate con la institución.",
       }, { status: 409 });
     }
   }
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     if (dup && dup.length > 0) {
       return NextResponse.json({
-        error: "Este documento ya está registrado por otro estudiante",
+        error: "Ya alguien se registró con esta identificación. Comunícate con la institución.",
       }, { status: 409 });
     }
 
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
     if (dupAsPadre && dupAsPadre.length > 0) {
       return NextResponse.json({
-        error: "Este documento ya está registrado como padre de familia",
+        error: "Ya alguien se registró con esta identificación como padre de familia. Comunícate con la institución.",
       }, { status: 409 });
     }
   }

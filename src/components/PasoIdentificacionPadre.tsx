@@ -29,7 +29,7 @@ export function PasoIdentificacionPadre({ initialValue = "", onContinue, onBack 
       const data = await res.json();
 
       if (data.ya_registrado) {
-        setError("Esta identificación ya está registrada. Si crees que es un error, comunícate con la institución.");
+        setError(data.mensaje || "Esta identificación ya está registrada. Comunícate con la institución.");
         return;
       }
 

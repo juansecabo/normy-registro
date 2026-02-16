@@ -17,7 +17,10 @@ export async function GET(request: NextRequest) {
     .limit(1);
 
   if (existingPadre && existingPadre.length > 0) {
-    return NextResponse.json({ ya_registrado: true });
+    return NextResponse.json({
+      ya_registrado: true,
+      mensaje: "Ya alguien se registró con esta identificación. Comunícate con la institución.",
+    });
   }
 
   // Check if already used as student identification
@@ -28,7 +31,10 @@ export async function GET(request: NextRequest) {
     .limit(1);
 
   if (existingEstudiante && existingEstudiante.length > 0) {
-    return NextResponse.json({ ya_registrado: true });
+    return NextResponse.json({
+      ya_registrado: true,
+      mensaje: "Ya alguien se registró con esta identificación como estudiante. Comunícate con la institución.",
+    });
   }
 
   return NextResponse.json({ ya_registrado: false });

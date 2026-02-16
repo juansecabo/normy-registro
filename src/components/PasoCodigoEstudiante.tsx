@@ -50,9 +50,7 @@ export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", c
       }
 
       if (data.ya_registrado) {
-        setError(
-          "Este documento ya está registrado por otro usuario. Si crees que es un error, comunícate con la institución."
-        );
+        setError(data.mensaje || "Este documento ya está registrado. Comunícate con la institución.");
         return;
       }
 

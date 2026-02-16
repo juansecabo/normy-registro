@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   let ya_registrado = false;
+  let mensaje = "";
 
   if (perfil === "Estudiante") {
     // Check the code isn't already taken by another student
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
 
     if (existing && existing.length > 0) {
       ya_registrado = true;
+      mensaje = "Ya alguien se registró con esta identificación. Comunícate con la institución.";
     }
 
     // Check the code isn't already used as a parent identification
@@ -45,6 +47,7 @@ export async function GET(request: NextRequest) {
 
       if (existingPadre && existingPadre.length > 0) {
         ya_registrado = true;
+        mensaje = "Ya alguien se registró con esta identificación como padre de familia. Comunícate con la institución.";
       }
     }
   }
@@ -52,6 +55,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     existe: true,
     ya_registrado,
+    mensaje,
     estudiante: {
       nombre: estudiante.nombre_estudiante,
       apellidos: estudiante.apellidos_estudiante,
