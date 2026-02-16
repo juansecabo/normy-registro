@@ -115,7 +115,7 @@ export function PasoResumen({
             <Card className="p-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <span className="text-sm text-muted-foreground">Nombre del padre</span>
+                  <span className="text-sm text-muted-foreground">Nombre</span>
                   <p className="font-semibold text-foreground">{padreNombre}</p>
                 </div>
                 <button
