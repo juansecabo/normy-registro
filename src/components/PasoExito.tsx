@@ -63,7 +63,7 @@ export function PasoExito({ perfil, padreNombre, padreNumEstudiantes }: Props) {
       />
 
       <a
-        href="https://wa.me/573023580862"
+        href="https://wa.me/573002883078"
         target="_blank"
         rel="noopener noreferrer"
       >
