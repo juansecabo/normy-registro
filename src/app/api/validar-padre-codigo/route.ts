@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   // Check if already used as parent identification
   const { data: existingPadre } = await supabase
     .from("Perfiles_Generales")
-    .select("id")
+    .select("numero_de_telefono")
     .eq("padre_codigo", codigo)
     .not("padre_codigo", "is", null)
     .limit(1);
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   // Check if already used as student identification
   const { data: existingEstudiante } = await supabase
     .from("Perfiles_Generales")
-    .select("id")
+    .select("numero_de_telefono")
     .eq("estudiante_codigo", codigo)
     .limit(1);
 

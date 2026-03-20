@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     // Check the code isn't already taken by another student
     const { data: existing } = await supabase
       .from("Perfiles_Generales")
-      .select("id")
+      .select("numero_de_telefono")
       .eq("estudiante_codigo", codigo)
       .limit(1);
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     if (!ya_registrado) {
       const { data: existingPadre } = await supabase
         .from("Perfiles_Generales")
-        .select("id")
+        .select("numero_de_telefono")
         .eq("padre_codigo", codigo)
         .not("padre_codigo", "is", null)
         .limit(1);

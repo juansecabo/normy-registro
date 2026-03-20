@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   // Verify the row exists
   const { data: existing } = await supabase
     .from("Perfiles_Generales")
-    .select("id, perfil, numero_de_telefono")
+    .select("perfil, numero_de_telefono")
     .eq("numero_de_telefono", id)
     .single();
 
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
   if (perfil === "Padre de familia" && updateData.padre_codigo) {
     const { data: dupPadre } = await supabase
       .from("Perfiles_Generales")
-      .select("id")
+      .select("numero_de_telefono")
       .eq("padre_codigo", updateData.padre_codigo)
       .not("padre_codigo", "is", null)
       .limit(1);
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     const { data: dupAsEstudiante } = await supabase
       .from("Perfiles_Generales")
-      .select("id")
+      .select("numero_de_telefono")
       .eq("estudiante_codigo", updateData.padre_codigo)
       .limit(1);
 
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
   if (perfil === "Estudiante" && updateData.estudiante_codigo) {
     const { data: dup } = await supabase
       .from("Perfiles_Generales")
-      .select("id")
+      .select("numero_de_telefono")
       .eq("estudiante_codigo", updateData.estudiante_codigo)
       .limit(1);
 
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     const { data: dupAsPadre } = await supabase
       .from("Perfiles_Generales")
-      .select("id")
+      .select("numero_de_telefono")
       .eq("padre_codigo", updateData.estudiante_codigo)
       .not("padre_codigo", "is", null)
       .limit(1);
