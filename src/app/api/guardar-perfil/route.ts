@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
   // Verify the row exists
   const { data: existing } = await supabase
     .from("Perfiles_Generales")
-    .select("id, perfil")
-    .eq("id", id)
+    .select("id, perfil, numero_de_telefono")
+    .eq("numero_de_telefono", id)
     .single();
 
   if (!existing) {
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
   const { error } = await supabase
     .from("Perfiles_Generales")
     .update(updateData)
-    .eq("id", id);
+    .eq("numero_de_telefono", id);
 
   if (error) {
     return NextResponse.json({ error: "Error al guardar el perfil" }, { status: 500 });

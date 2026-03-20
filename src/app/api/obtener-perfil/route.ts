@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from("Perfiles_Generales")
     .select("*")
-    .eq("id", id)
+    .eq("numero_de_telefono", id)
     .single();
 
   if (error || !data) {
