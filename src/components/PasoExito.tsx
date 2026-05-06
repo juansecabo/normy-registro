@@ -14,6 +14,7 @@ export function PasoExito({ perfil, padreNombre, padreNumEstudiantes }: Props) {
     "1 (uno)": "1",
     "2 (dos)": "2",
     "3 (tres)": "3",
+    "4 (cuatro)": "4",
   };
   const numDisplay = padreNumEstudiantes ? numMap[padreNumEstudiantes] || padreNumEstudiantes : "";
 

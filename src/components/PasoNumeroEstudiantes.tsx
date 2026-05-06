@@ -4,15 +4,16 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 
 interface Props {
-  onSelect: (numero: "1 (uno)" | "2 (dos)" | "3 (tres)") => void;
+  onSelect: (numero: "1 (uno)" | "2 (dos)" | "3 (tres)" | "4 (cuatro)") => void;
   onBack: () => void;
 }
 
 export function PasoNumeroEstudiantes({ onSelect, onBack }: Props) {
-  const opciones: { label: string; value: "1 (uno)" | "2 (dos)" | "3 (tres)" }[] = [
+  const opciones: { label: string; value: "1 (uno)" | "2 (dos)" | "3 (tres)" | "4 (cuatro)" }[] = [
     { label: "1", value: "1 (uno)" },
     { label: "2", value: "2 (dos)" },
     { label: "3", value: "3 (tres)" },
+    { label: "4", value: "4 (cuatro)" },
   ];
 
   return (

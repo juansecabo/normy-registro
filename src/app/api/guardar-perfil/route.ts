@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
       "1 (uno)": 1,
       "2 (dos)": 2,
       "3 (tres)": 3,
+      "4 (cuatro)": 4,
     };
     const num = numMap[campos.padre_numero_de_estudiantes] || 0;
 
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
   // Check for duplicate ids within the same submission
   const allIds: string[] = [];
   if (updateData.estudiante_id) allIds.push(updateData.estudiante_id);
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 4; i++) {
     const key = `padre_estudiante${i}_id`;
     if (updateData[key]) allIds.push(updateData[key]!);
   }

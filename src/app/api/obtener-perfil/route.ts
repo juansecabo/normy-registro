@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
   if (data.perfil === "Estudiante") {
     ya_registrado = !!data.estudiante_id && !!data.contrasena;
   } else if (data.perfil === "Padre de familia") {
-    const numMap: Record<string, number> = { "1 (uno)": 1, "2 (dos)": 2, "3 (tres)": 3 };
+    const numMap: Record<string, number> = { "1 (uno)": 1, "2 (dos)": 2, "3 (tres)": 3, "4 (cuatro)": 4 };
     const required = numMap[data.padre_numero_de_estudiantes] || 0;
     if (required > 0 && data.padre_nombre && data.contrasena && data.padre_id) {
-      const ids = [data.padre_estudiante1_id, data.padre_estudiante2_id, data.padre_estudiante3_id];
+      const ids = [data.padre_estudiante1_id, data.padre_estudiante2_id, data.padre_estudiante3_id, data.padre_estudiante4_id];
       ya_registrado = ids.slice(0, required).every((c: string | null) => !!c);
     }
   }

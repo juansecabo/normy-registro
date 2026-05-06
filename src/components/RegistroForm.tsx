@@ -23,7 +23,7 @@ interface EstudianteInfo {
 }
 
 type Perfil = "Estudiante" | "Padre de familia";
-type NumEstudiantes = "1 (uno)" | "2 (dos)" | "3 (tres)";
+type NumEstudiantes = "1 (uno)" | "2 (dos)" | "3 (tres)" | "4 (cuatro)";
 
 interface FormState {
   perfil?: Perfil;
@@ -37,7 +37,7 @@ interface FormState {
 
 type PageStatus = "loading" | "invalid" | "already_registered" | "form" | "success";
 
-const NUM_MAP: Record<string, number> = { "1 (uno)": 1, "2 (dos)": 2, "3 (tres)": 3 };
+const NUM_MAP: Record<string, number> = { "1 (uno)": 1, "2 (dos)": 2, "3 (tres)": 3, "4 (cuatro)": 4 };
 
 export function RegistroForm({ contactId }: { contactId: string }) {
   const [status, setStatus] = useState<PageStatus>("loading");
