@@ -6,17 +6,17 @@ import { Input } from "./ui/input";
 
 interface Props {
   initialValue?: string;
-  onContinue: (codigo: string) => void;
+  onContinue: (id: string) => void;
   onBack: () => void;
 }
 
 export function PasoIdentificacionPadre({ initialValue = "", onContinue, onBack }: Props) {
-  const [codigo, setCodigo] = useState(initialValue);
+  const [id, setId] = useState(initialValue);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleContinue = async () => {
-    if (!codigo.trim()) {
+    if (!id.trim()) {
       setError("Ingresa tu número de identificación");
       return;
     }
@@ -25,7 +25,7 @@ export function PasoIdentificacionPadre({ initialValue = "", onContinue, onBack 
     setError("");
 
     try {
-      const res = await fetch(`/api/validar-padre-codigo?codigo=${encodeURIComponent(codigo.trim())}`);
+      const res = await fetch(`/api/validar-padre-codigo?id=${encodeURIComponent(id.trim())}`);
       const data = await res.json();
 
       if (data.ya_registrado) {
@@ -33,7 +33,7 @@ export function PasoIdentificacionPadre({ initialValue = "", onContinue, onBack 
         return;
       }
 
-      onContinue(codigo.trim());
+      onContinue(id.trim());
     } catch {
       setError("Error de conexión. Intenta de nuevo.");
     } finally {
@@ -57,10 +57,10 @@ export function PasoIdentificacionPadre({ initialValue = "", onContinue, onBack 
           type="text"
           inputMode="numeric"
           placeholder="Ej: 1103127132"
-          value={codigo}
+          value={id}
           onChange={(e) => {
             const val = e.target.value.replace(/\D/g, "");
-            setCodigo(val);
+            setId(val);
             setError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && handleContinue()}

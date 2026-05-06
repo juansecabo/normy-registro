@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
-  const codigo = request.nextUrl.searchParams.get("codigo");
+  const id = request.nextUrl.searchParams.get("id");
 
-  if (!codigo) {
-    return NextResponse.json({ error: "Falta el parámetro codigo" }, { status: 400 });
+  if (!id) {
+    return NextResponse.json({ error: "Falta el parámetro id" }, { status: 400 });
   }
 
   // Check if already used as parent identification
   const { data: existingPadre } = await supabase
     .from("Perfiles_Generales")
     .select("numero_de_telefono")
-    .eq("padre_codigo", codigo)
-    .not("padre_codigo", "is", null)
+    .eq("padre_id", id)
+    .not("padre_id", "is", null)
     .limit(1);
 
   if (existingPadre && existingPadre.length > 0) {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   const { data: existingEstudiante } = await supabase
     .from("Perfiles_Generales")
     .select("numero_de_telefono")
-    .eq("estudiante_codigo", codigo)
+    .eq("estudiante_id", id)
     .limit(1);
 
   if (existingEstudiante && existingEstudiante.length > 0) {

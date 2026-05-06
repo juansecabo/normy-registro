@@ -6,7 +6,7 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 
 interface EstudianteInfo {
-  codigo: string;
+  id: string;
   nombre: string;
   apellidos: string;
   nivel: string;
@@ -18,7 +18,7 @@ interface Props {
   perfil: "Estudiante" | "Padre de familia";
   estudiante?: EstudianteInfo;
   contrasena?: string;
-  padreCodigo?: string;
+  padreId?: string;
   padreNombre?: string;
   padreNumEstudiantes?: string;
   padreEstudiantes?: EstudianteInfo[];
@@ -34,7 +34,7 @@ export function PasoResumen({
   perfil,
   estudiante,
   contrasena,
-  padreCodigo,
+  padreId,
   padreNombre,
   padreNumEstudiantes,
   padreEstudiantes,
@@ -86,7 +86,7 @@ export function PasoResumen({
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Documento</span>
-                  <p className="font-medium text-foreground">{estudiante.codigo}</p>
+                  <p className="font-medium text-foreground">{estudiante.id}</p>
                 </div>
                 <div className="flex gap-4">
                   <div>
@@ -127,12 +127,12 @@ export function PasoResumen({
               </div>
             </Card>
 
-            {padreCodigo && (
+            {padreId && (
               <Card className="p-4">
                 <div className="flex justify-between items-center">
                   <div>
                     <span className="text-sm text-muted-foreground">Identificación</span>
-                    <p className="font-semibold text-foreground">{padreCodigo}</p>
+                    <p className="font-semibold text-foreground">{padreId}</p>
                   </div>
                   <button
                     onClick={() => onEdit(identificationStep || 3)}
@@ -170,7 +170,7 @@ export function PasoResumen({
                       {est.nombre} {est.apellidos}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Doc: {est.codigo} · {est.grado} - Salón {est.salon}
+                      Doc: {est.id} · {est.grado} - Salón {est.salon}
                     </p>
                   </div>
                   <button

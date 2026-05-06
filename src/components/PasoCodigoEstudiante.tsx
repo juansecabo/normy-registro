@@ -16,23 +16,23 @@ interface Props {
   label?: string;
   subtitle?: string;
   perfil?: "Estudiante" | "Padre de familia";
-  codigosYaUsados?: string[];
-  onValidado: (codigo: string, estudiante: EstudianteData) => void;
+  idsYaUsados?: string[];
+  onValidado: (id: string, estudiante: EstudianteData) => void;
   onBack: () => void;
 }
 
-export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", codigosYaUsados = [], onValidado, onBack }: Props) {
-  const [codigo, setCodigo] = useState("");
+export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", idsYaUsados = [], onValidado, onBack }: Props) {
+  const [id, setId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleValidar = async () => {
-    if (!codigo.trim()) {
+    if (!id.trim()) {
       setError("Ingresa el número de documento");
       return;
     }
 
-    if (codigosYaUsados.includes(codigo.trim())) {
+    if (idsYaUsados.includes(id.trim())) {
       setError("Ya ingresaste este documento para otro estudiante. Cada estudiante debe tener un número diferente.");
       return;
     }
@@ -41,7 +41,7 @@ export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", c
     setError("");
 
     try {
-      const res = await fetch(`/api/validar-codigo?codigo=${encodeURIComponent(codigo.trim())}&perfil=${encodeURIComponent(perfil)}`);
+      const res = await fetch(`/api/validar-codigo?id=${encodeURIComponent(id.trim())}&perfil=${encodeURIComponent(perfil)}`);
       const data = await res.json();
 
       if (!data.existe) {
@@ -54,7 +54,7 @@ export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", c
         return;
       }
 
-      onValidado(codigo.trim(), data.estudiante);
+      onValidado(id.trim(), data.estudiante);
     } catch {
       setError("Error de conexión. Intenta de nuevo.");
     } finally {
@@ -81,9 +81,9 @@ export function PasoCodigoEstudiante({ label, subtitle, perfil = "Estudiante", c
           inputMode="numeric"
           pattern="[0-9]*"
           placeholder="Ej: 1103127132"
-          value={codigo}
+          value={id}
           onChange={(e) => {
-            setCodigo(e.target.value);
+            setId(e.target.value);
             setError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && handleValidar()}

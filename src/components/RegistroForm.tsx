@@ -14,7 +14,7 @@ import { PasoExito } from "./PasoExito";
 import { PasoYaRegistrado } from "./PasoYaRegistrado";
 
 interface EstudianteInfo {
-  codigo: string;
+  id: string;
   nombre: string;
   apellidos: string;
   nivel: string;
@@ -29,7 +29,7 @@ interface FormState {
   perfil?: Perfil;
   estudiante?: EstudianteInfo;
   contrasena?: string;
-  padreCodigo?: string;
+  padreId?: string;
   padreNombre?: string;
   padreNumEstudiantes?: NumEstudiantes;
   padreEstudiantes: EstudianteInfo[];
@@ -78,10 +78,10 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     return 6 + n * 2;
   };
 
-  const getCodigosYaUsados = (excludeIndex?: number) => {
+  const getIdsYaUsados = (excludeIndex?: number) => {
     return form.padreEstudiantes
       .filter((_, i) => i !== excludeIndex)
-      .map((e) => e.codigo);
+      .map((e) => e.id);
   };
 
   const handleSubmit = async () => {
@@ -94,13 +94,13 @@ export function RegistroForm({ contactId }: { contactId: string }) {
         contrasena: form.contrasena,
       };
       if (form.perfil === "Estudiante" && form.estudiante) {
-        body.estudiante_codigo = form.estudiante.codigo;
+        body.estudiante_id = form.estudiante.id;
       } else if (form.perfil === "Padre de familia") {
-        body.padre_codigo = form.padreCodigo;
+        body.padre_id = form.padreId;
         body.padre_nombre = form.padreNombre;
         body.padre_numero_de_estudiantes = form.padreNumEstudiantes;
         form.padreEstudiantes.forEach((est, i) => {
-          body[`padre_estudiante${i + 1}_codigo`] = est.codigo;
+          body[`padre_estudiante${i + 1}_id`] = est.id;
         });
       }
       const res = await fetch("/api/guardar-perfil", {
@@ -170,7 +170,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
     return (
       <PasoSeleccionPerfil
         onSelect={(perfil) => {
-          setForm({ ...form, perfil, estudiante: undefined, padreEstudiantes: [], contrasena: undefined, padreCodigo: undefined });
+          setForm({ ...form, perfil, estudiante: undefined, padreEstudiantes: [], contrasena: undefined, padreId: undefined });
           setPendingEstudiante(null);
           setPendingPadreEstudiante(null);
           setEditingFromSummary(false);
@@ -190,8 +190,8 @@ export function RegistroForm({ contactId }: { contactId: string }) {
           <ProgressBar currentStep={2} totalSteps={5} />
           <PasoCodigoEstudiante
             perfil="Estudiante"
-            onValidado={(codigo, est) => {
-              setPendingEstudiante({ codigo, ...est });
+            onValidado={(id, est) => {
+              setPendingEstudiante({ id, ...est });
               setStep(3);
             }}
             onBack={() => {
@@ -302,9 +302,9 @@ export function RegistroForm({ contactId }: { contactId: string }) {
         <>
           <ProgressBar currentStep={3} totalSteps={getTotalSteps()} />
           <PasoIdentificacionPadre
-            initialValue={form.padreCodigo}
-            onContinue={(codigo) => {
-              setForm({ ...form, padreCodigo: codigo });
+            initialValue={form.padreId}
+            onContinue={(id) => {
+              setForm({ ...form, padreId: id });
               if (editingFromSummary) { returnToSummary(); }
               else { setStep(4); }
             }}
@@ -355,9 +355,9 @@ export function RegistroForm({ contactId }: { contactId: string }) {
               label={`Documento del estudiante${ordinal}`}
               subtitle="Ingresa el número de documento con el que se matriculó tu niño/a"
               perfil="Padre de familia"
-              codigosYaUsados={getCodigosYaUsados(studentIndex)}
-              onValidado={(codigo, est) => {
-                setPendingPadreEstudiante({ codigo, ...est });
+              idsYaUsados={getIdsYaUsados(studentIndex)}
+              onValidado={(id, est) => {
+                setPendingPadreEstudiante({ id, ...est });
                 setStep(step + 1);
               }}
               onBack={() => {
@@ -440,7 +440,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
           <PasoResumen
             perfil="Padre de familia"
             padreNombre={form.padreNombre}
-            padreCodigo={form.padreCodigo}
+            padreId={form.padreId}
             contrasena={form.contrasena}
             padreNumEstudiantes={form.padreNumEstudiantes}
             padreEstudiantes={form.padreEstudiantes}

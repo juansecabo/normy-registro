@@ -31,21 +31,21 @@ export async function POST(request: NextRequest) {
   }
 
   if (perfil === "Estudiante") {
-    if (!campos.estudiante_codigo) {
-      return NextResponse.json({ error: "Falta el código estudiantil" }, { status: 400 });
+    if (!campos.estudiante_id) {
+      return NextResponse.json({ error: "Falta el id estudiantil" }, { status: 400 });
     }
-    updateData.estudiante_codigo = campos.estudiante_codigo;
+    updateData.estudiante_id = campos.estudiante_id;
   } else if (perfil === "Padre de familia") {
     if (!campos.padre_nombre || !campos.padre_numero_de_estudiantes) {
       return NextResponse.json({ error: "Faltan datos del padre" }, { status: 400 });
     }
     updateData.padre_nombre = campos.padre_nombre;
     updateData.padre_numero_de_estudiantes = campos.padre_numero_de_estudiantes;
-    if (campos.padre_codigo) {
-      updateData.padre_codigo = campos.padre_codigo;
+    if (campos.padre_id) {
+      updateData.padre_id = campos.padre_id;
     }
 
-    // Add student codes based on number of students
+    // Add student ids based on number of students
     const numMap: Record<string, number> = {
       "1 (uno)": 1,
       "2 (dos)": 2,
@@ -54,46 +54,46 @@ export async function POST(request: NextRequest) {
     const num = numMap[campos.padre_numero_de_estudiantes] || 0;
 
     for (let i = 1; i <= num; i++) {
-      const codigoKey = `padre_estudiante${i}_codigo`;
-      if (!campos[codigoKey]) {
-        return NextResponse.json({ error: `Falta el código del estudiante ${i}` }, { status: 400 });
+      const idKey = `padre_estudiante${i}_id`;
+      if (!campos[idKey]) {
+        return NextResponse.json({ error: `Falta el id del estudiante ${i}` }, { status: 400 });
       }
-      updateData[codigoKey] = campos[codigoKey];
+      updateData[idKey] = campos[idKey];
     }
   }
 
-  // Check for duplicate codes within the same submission
-  const allCodes: string[] = [];
-  if (updateData.estudiante_codigo) allCodes.push(updateData.estudiante_codigo);
+  // Check for duplicate ids within the same submission
+  const allIds: string[] = [];
+  if (updateData.estudiante_id) allIds.push(updateData.estudiante_id);
   for (let i = 1; i <= 3; i++) {
-    const key = `padre_estudiante${i}_codigo`;
-    if (updateData[key]) allCodes.push(updateData[key]!);
+    const key = `padre_estudiante${i}_id`;
+    if (updateData[key]) allIds.push(updateData[key]!);
   }
-  const uniqueCodes = new Set(allCodes);
-  if (uniqueCodes.size !== allCodes.length) {
-    return NextResponse.json({ error: "No puedes registrar el mismo código para más de un estudiante" }, { status: 400 });
+  const uniqueIds = new Set(allIds);
+  if (uniqueIds.size !== allIds.length) {
+    return NextResponse.json({ error: "No puedes registrar el mismo id para más de un estudiante" }, { status: 400 });
   }
 
-  // Server-side re-validation: check all codes exist in Estudiantes
-  for (const codigo of allCodes) {
+  // Server-side re-validation: check all ids exist in Estudiantes
+  for (const idEstudiantil of allIds) {
     const { data: est } = await supabase
       .from("Estudiantes")
-      .select("codigo_estudiantil")
-      .eq("codigo_estudiantil", codigo)
+      .select("id_estudiantil")
+      .eq("id_estudiantil", idEstudiantil)
       .single();
 
     if (!est) {
-      return NextResponse.json({ error: `Documento ${codigo} no encontrado` }, { status: 400 });
+      return NextResponse.json({ error: `Documento ${idEstudiantil} no encontrado` }, { status: 400 });
     }
   }
 
   // Cross-validation: ensure identification isn't used in the other profile type
-  if (perfil === "Padre de familia" && updateData.padre_codigo) {
+  if (perfil === "Padre de familia" && updateData.padre_id) {
     const { data: dupPadre } = await supabase
       .from("Perfiles_Generales")
       .select("numero_de_telefono")
-      .eq("padre_codigo", updateData.padre_codigo)
-      .not("padre_codigo", "is", null)
+      .eq("padre_id", updateData.padre_id)
+      .not("padre_id", "is", null)
       .limit(1);
 
     if (dupPadre && dupPadre.length > 0) {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const { data: dupAsEstudiante } = await supabase
       .from("Perfiles_Generales")
       .select("numero_de_telefono")
-      .eq("estudiante_codigo", updateData.padre_codigo)
+      .eq("estudiante_id", updateData.padre_id)
       .limit(1);
 
     if (dupAsEstudiante && dupAsEstudiante.length > 0) {
@@ -115,11 +115,11 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (perfil === "Estudiante" && updateData.estudiante_codigo) {
+  if (perfil === "Estudiante" && updateData.estudiante_id) {
     const { data: dup } = await supabase
       .from("Perfiles_Generales")
       .select("numero_de_telefono")
-      .eq("estudiante_codigo", updateData.estudiante_codigo)
+      .eq("estudiante_id", updateData.estudiante_id)
       .limit(1);
 
     if (dup && dup.length > 0) {
@@ -131,8 +131,8 @@ export async function POST(request: NextRequest) {
     const { data: dupAsPadre } = await supabase
       .from("Perfiles_Generales")
       .select("numero_de_telefono")
-      .eq("padre_codigo", updateData.estudiante_codigo)
-      .not("padre_codigo", "is", null)
+      .eq("padre_id", updateData.estudiante_id)
+      .not("padre_id", "is", null)
       .limit(1);
 
     if (dupAsPadre && dupAsPadre.length > 0) {

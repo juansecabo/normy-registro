@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
-  const codigo = request.nextUrl.searchParams.get("codigo");
+  const id = request.nextUrl.searchParams.get("id");
   const perfil = request.nextUrl.searchParams.get("perfil") || "Estudiante";
 
-  if (!codigo) {
-    return NextResponse.json({ error: "Falta el parámetro codigo" }, { status: 400 });
+  if (!id) {
+    return NextResponse.json({ error: "Falta el parámetro id" }, { status: 400 });
   }
 
   // Look up the student in the Estudiantes table
   const { data: estudiante, error } = await supabase
     .from("Estudiantes")
-    .select("codigo_estudiantil, nombre_estudiante, apellidos_estudiante, nivel_estudiante, grado_estudiante, salon_estudiante")
-    .eq("codigo_estudiantil", codigo)
+    .select("id_estudiantil, nombre_estudiante, apellidos_estudiante, nivel_estudiante, grado_estudiante, salon_estudiante")
+    .eq("id_estudiantil", id)
     .single();
 
   if (error || !estudiante) {
@@ -24,11 +24,11 @@ export async function GET(request: NextRequest) {
   let mensaje = "";
 
   if (perfil === "Estudiante") {
-    // Check the code isn't already taken by another student
+    // Check the id isn't already taken by another student
     const { data: existing } = await supabase
       .from("Perfiles_Generales")
       .select("numero_de_telefono")
-      .eq("estudiante_codigo", codigo)
+      .eq("estudiante_id", id)
       .limit(1);
 
     if (existing && existing.length > 0) {
@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
       mensaje = "Ya alguien se registró con esta identificación. Comunícate con la institución.";
     }
 
-    // Check the code isn't already used as a parent identification
+    // Check the id isn't already used as a parent identification
     if (!ya_registrado) {
       const { data: existingPadre } = await supabase
         .from("Perfiles_Generales")
         .select("numero_de_telefono")
-        .eq("padre_codigo", codigo)
-        .not("padre_codigo", "is", null)
+        .eq("padre_id", id)
+        .not("padre_id", "is", null)
         .limit(1);
 
       if (existingPadre && existingPadre.length > 0) {
