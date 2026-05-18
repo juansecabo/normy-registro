@@ -164,7 +164,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
   );
 
   // =============================================
-  // PARENT FLOW (automatic - phone found in telefono_acudiente)
+  // PARENT FLOW (automatic - phone found in acudienteN_telefono)
   // Steps: 1-Greeting+Confirm, 2-ID, 3-Password, 4-Summary
   // =============================================
   if (status === "padre_greeting") {
@@ -306,7 +306,7 @@ export function RegistroForm({ contactId }: { contactId: string }) {
   }
 
   // =============================================
-  // STUDENT FLOW (automatic - phone NOT in telefono_acudiente)
+  // STUDENT FLOW (automatic - phone NOT in acudienteN_telefono)
   // Steps: 1-ID, 2-Confirm, 3-Password, 4-Summary
   // =============================================
   if (status === "student_flow") {
